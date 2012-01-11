@@ -3,6 +3,8 @@
     <title>stupid youtube player</title>
 </head>
 <body>
+  <h1>stupid YouTube player</h1>
+
   <script type="text/javascript" src="swfobject/swfobject.js"></script>    
   <div id="ytapiplayer">
     You need Flash player 8+ and JavaScript enabled to view this video.
@@ -15,29 +17,80 @@
     var params = { allowScriptAccess: "always" };
     var atts = { id: "myytplayer" };
     // there must be a way to include this without a video, but FIIK how
-    swfobject.embedSWF("http://www.youtube.com/v/ny7NZPfl0l4?enablejsapi=1&playerapiid=ytplayer&version=3",
+    swfobject.embedSWF("http://www.youtube.com/apiplayer?enablejsapi=1&version=3",
                        "ytapiplayer", "425", "356", "8", null, null, params, atts);
 
     function onYouTubePlayerReady(playerId) {
         ytplayer = document.getElementById("myytplayer");
         ytplayer.addEventListener("onStateChange", "onytplayerStateChange");
+        ytplayer.addEventListener("onError", "onytplayerError");
     }
 
     function onytplayerStateChange(newState) {
-        if (newState ==  0) {       // ended
+        // ended
+        if (newState ==  0) {
             load_next_video();
         }
     }
 
+    function onytplayerError(code) {
+        if (code ==  2) {
+            debug_and_error("request contains an invalid parameter");
+        } else if (code == 100) {
+            debug_and_error("video not found");
+        } else if (code == 101 || code == 150) {
+            debug_and_error("video requested does not allow playback on embedded players");
+        } else {
+            debug_and_error("unrecognized error code " + code);
+        }
+        if (document.getElementById("skip_errors_p").checked) {
+            load_next_video();
+        }
+    }
+
+    function debug_and_error(msg) {
+        debug_msg(msg);
+        update_error(msg);
+    }
+
+    function start_play_or_pause() {
+        if (ytplayer) { 
+            var state = ytplayer.getPlayerState()
+            // unstarted
+            if (state == -1) {
+                load_curr_video();
+            // ended
+            //} else if (state == 0) {
+            // playing
+            } else if (state == 1) {
+                ytplayer.pauseVideo();
+            // paused
+            //} else if (state == 2) {
+            // buffering
+            //} else if (state == 3) {
+            // video cued
+            //} else if (state == 5) {
+            } else {
+                ytplayer.playVideo();
+            }
+        }
+    }
+
+    function get_playlist() {
+        return document.getElementById("playlist").value.split("\n");
+    }
+
     function load_curr_video() {
-        playlist = document.getElementById("playlist").value.split("\n");
-        url = playlist[line];
+        var playlist = get_playlist();
+        var url = playlist[line];
+        clear_error();
         debug_msg("Playing " + url + "...");
+        update_url(url);
         if (ytplayer) { ytplayer.loadVideoByUrl(url); }
     }
 
     function load_next_video() {
-        line++;
+        if (line < get_playlist().length - 1) { line++; }
         load_curr_video();
     }
 
@@ -46,26 +99,58 @@
         load_curr_video();
     }
 
+    function update_box(boxid, text) {
+        var box = document.getElementById(boxid);
+        if (box.childNodes.length == 0) {
+            box.appendChild(document.createTextNode(""));
+        }
+        box.childNodes[0].nodeValue = text;
+    }
+
+    function clear_box(boxid) {
+        var box = document.getElementById(boxid);
+        if (box.hasChildNodes()) {
+            while (box.childNodes.length > 0) {
+                box.removeChild(box.firstChild);
+            }
+        }
+    }
+
+    function update_url(url) {
+        update_box("urlbox", "Url: " + url);
+    }
+
+    function update_error(msg) {
+        update_box("errorbox", "Error: " + msg);
+    }
+
+    function clear_error() { 
+        clear_box("errorbox"); 
+    }
+
     function debug_msg(msg) {
-        debug = document.getElementById("debug");
+        var debug = document.getElementById("debug");
         debug.appendChild(document.createTextNode(msg));
         debug.appendChild(document.createElement('br'));
     }
 
-    function play() { if (ytplayer) { load_curr_video(); } }
-    function pause() { if (ytplayer) { ytplayer.pauseVideo(); } }
+    function playpause() { if (ytplayer) { start_play_or_pause(); } }
     function next() { if (ytplayer) { load_next_video(); } }
     function prev() { if (ytplayer) { load_prev_video(); } }
   </script>
-  <a href="javascript:void(0);" onclick="play();">Play</a>
-  <a href="javascript:void(0);" onclick="pause();">Pause</a>
-  <a href="javascript:void(0);" onclick="prev();">Prev</a>
-  <a href="javascript:void(0);" onclick="next();">Next</a>
+  <p id="controls">
+    <a href="javascript:void(0);" onclick="playpause();">Play/Pause</a>
+    <a href="javascript:void(0);" onclick="prev();">Prev</a>
+    <a href="javascript:void(0);" onclick="next();">Next</a>
+    <label for="skip_errors_p">Skip errors?</label><input type="checkbox" id="skip_errors_p" checked /><br />
+  </p>
 
-  <p id="debug"></p>
+  <p id="errorbox" style="background-color: #f99; text-color: #f00;"></p>
+  <p id="urlbox" style="background-color: #ff9;"></p>
 
   <form id="playlist_form">
-    <textarea id="playlist" rows="20" cols="80">
+    <textarea id="playlist" rows="20" cols="80"></textarea>
+<!--    // sample URLs
 http://www.youtube.com/v/BTruv-lVoLk?version=3&amp;hl=en_US
 http://www.youtube.com/embed/Cbpb_mlSCNg?rel=0
 http://www.youtube.com/embed/71xpQUFgk_k?rel=0
@@ -79,8 +164,10 @@ http://www.youtube.com/embed/dX3k_QDnzHE
 http://www.youtube.com/embed/5HnF5T4Neuc
 http://www.youtube.com/embed/p6-C9iwPg3M
 http://www.youtube.com/embed/BFdiW2soDag
-    </textarea>
+-->
   </form>
+
+  <p id="debug"></p>
 
 </body>
 </html>
