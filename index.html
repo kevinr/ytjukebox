@@ -1,0 +1,86 @@
+<html>
+<head>
+    <title>stupid youtube player</title>
+</head>
+<body>
+  <script type="text/javascript" src="swfobject/swfobject.js"></script>    
+  <div id="ytapiplayer">
+    You need Flash player 8+ and JavaScript enabled to view this video.
+  </div>
+
+  <script type="text/javascript">
+    
+    var line = 0;
+
+    var params = { allowScriptAccess: "always" };
+    var atts = { id: "myytplayer" };
+    // there must be a way to include this without a video, but FIIK how
+    swfobject.embedSWF("http://www.youtube.com/v/ny7NZPfl0l4?enablejsapi=1&playerapiid=ytplayer&version=3",
+                       "ytapiplayer", "425", "356", "8", null, null, params, atts);
+
+    function onYouTubePlayerReady(playerId) {
+        ytplayer = document.getElementById("myytplayer");
+        ytplayer.addEventListener("onStateChange", "onytplayerStateChange");
+    }
+
+    function onytplayerStateChange(newState) {
+        if (newState ==  0) {       // ended
+            load_next_video();
+        }
+    }
+
+    function load_curr_video() {
+        playlist = document.getElementById("playlist").value.split("\n");
+        url = playlist[line];
+        debug_msg("Playing " + url + "...");
+        if (ytplayer) { ytplayer.loadVideoByUrl(url); }
+    }
+
+    function load_next_video() {
+        line++;
+        load_curr_video();
+    }
+
+    function load_prev_video() {
+        if (line > 0) { line--; }
+        load_curr_video();
+    }
+
+    function debug_msg(msg) {
+        debug = document.getElementById("debug");
+        debug.appendChild(document.createTextNode(msg));
+        debug.appendChild(document.createElement('br'));
+    }
+
+    function play() { if (ytplayer) { load_curr_video(); } }
+    function pause() { if (ytplayer) { ytplayer.pauseVideo(); } }
+    function next() { if (ytplayer) { load_next_video(); } }
+    function prev() { if (ytplayer) { load_prev_video(); } }
+  </script>
+  <a href="javascript:void(0);" onclick="play();">Play</a>
+  <a href="javascript:void(0);" onclick="pause();">Pause</a>
+  <a href="javascript:void(0);" onclick="prev();">Prev</a>
+  <a href="javascript:void(0);" onclick="next();">Next</a>
+
+  <p id="debug"></p>
+
+  <form id="playlist_form">
+    <textarea id="playlist" rows="20" cols="80">
+http://www.youtube.com/v/BTruv-lVoLk?version=3&amp;hl=en_US
+http://www.youtube.com/embed/Cbpb_mlSCNg?rel=0
+http://www.youtube.com/embed/71xpQUFgk_k?rel=0
+http://www.youtube.com/v/ognBcHjlcJo?version=3&amp;hl=en_US&amp;rel=0
+http://www.youtube.com/watch?v=sSXmPwT-0RU
+http://www.youtube.com/v/Ws5rz3-AvBU?version=3&amp;hl=en_US
+http://www.youtube.com/v/Fc6z6tP20g8?version=3&amp;hl=en_US
+http://www.youtube.com/watch?v=IzOA6YuhsaU
+http://www.youtube.com/watch?v=ny7NZPfl0l4
+http://www.youtube.com/embed/dX3k_QDnzHE
+http://www.youtube.com/embed/5HnF5T4Neuc
+http://www.youtube.com/embed/p6-C9iwPg3M
+http://www.youtube.com/embed/BFdiW2soDag
+    </textarea>
+  </form>
+
+</body>
+</html>
