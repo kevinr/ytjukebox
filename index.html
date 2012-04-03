@@ -1,9 +1,9 @@
 <html>
 <head>
-    <title>stupid youtube player</title>
+    <title>simple youtube jukebox</title>
 </head>
 <body>
-  <h1>stupid YouTube player</h1>
+  <h1>simple youtube jukebox</h1>
 
   <script type="text/javascript" src="swfobject/swfobject.js"></script>    
   <div id="ytapiplayer">
@@ -16,7 +16,6 @@
 
     var params = { allowScriptAccess: "always" };
     var atts = { id: "myytplayer" };
-    // there must be a way to include this without a video, but FIIK how
     swfobject.embedSWF("http://www.youtube.com/apiplayer?enablejsapi=1&version=3",
                        "ytapiplayer", "425", "356", "8", null, null, params, atts);
 
@@ -149,6 +148,7 @@
   <p id="urlbox" style="background-color: #ff9;"></p>
 
   <form id="playlist_form">
+    <label for="playlist">Playlist (list youtube URLs here, one per line):</label><br />
     <textarea id="playlist" rows="20" cols="80"></textarea>
 <!--    // sample URLs
 http://www.youtube.com/v/BTruv-lVoLk?version=3&amp;hl=en_US
