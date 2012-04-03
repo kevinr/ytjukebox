@@ -1,0 +1,27 @@
+a simple YouTube jukebox
+------------------------
+
+
+knocked together in an evening
+written in JavaScript; uses swfobject
+
+It works like this: 
+* you find a site which has a bunch of YouTube links you want to listen to;
+* you feed its URL(s) to ytscrape.py and save the output (requires Python and
+  the requests library, available at a fine Cheeseshop near you), eg.
+    ./ytscrape.py 'http://yuki-onna.livejournal.com/668502.html' > \
+    autoaudiography-turn-it-up.txt
+* you run the server (blah blah Flash single origin blah blah) (requires
+  Python), eg.
+    ./server.sh
+* you navigate to http://localhost:8000 in your favorite web browser;
+* you copy-and-paste that file's contents into the playlist on the jukebox
+  page, eg.
+    cat autoaudiography-turn-it-up.txt | xclip
+  and middle-click, if you're me and running Linux;
+* you click 'Play/Pause';
+* and bask in the sound.
+
+
+HTML+JavaScript is brilliant, it's like the Visual Basic of the 21st century.
+Zero to working UI in no time at all.  :-D
